@@ -4,12 +4,16 @@ import pandas as pd
 import os 
 import keras
  
-class assignment1():
-    def __init__(self):
+class Image():
+    def __init__(self, path):
+        self.path = path
+        
         i = 0
 
-    def func(self):
+    def histogram(self):
+
         return True
+
 
 
     
