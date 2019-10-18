@@ -195,4 +195,11 @@ class convolution():
             k = k + 1
         return (y)
 
-
+def main():
+    path = input("enter the path to the image here")
+    image = Image(path)
+    if path[-3:]: == 'png':
+        img = Image.import_image()
+    else:
+        img = Image.import_nib_compatible()
+    
