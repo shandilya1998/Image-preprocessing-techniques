@@ -97,21 +97,66 @@ class gradient():
         self.img = nib.load(self.path)
         self.image_data = self.img.get_fdata()
 
-    def grad_x(self, im):
-        grad_x = np.zeros((im.shape[0], im.shape[1]))
-        temp = np.zeros((im.shape[0]+2,im.shape[1]+2))
-        temp[1:temp.shape[0]-1,1:temp.shape[1]-1] = im
-        for i in range(0,im.shape[0]):
-            for j in range(0,im.shape[1]):
-                grad_x[i][j] = 0.5*(im[i][j+1]-im[i][j]+im[i+1][j+1]-im[i+1][j])
+    def grad_x(self, im, formulation):
+        """
+            im - np.ndarray() n*m
+            formulation - Choice of formulation of gradient: 0 or 1
+            Padding applied : 1
+            Output : np.ndarray() (n)*(m)
+        """
+        grad_x = np.zeros((im.shape[0], im.shape[1])) 
+        temp = np.zeros((im.shape[0] + 1, im.shape[1] + 1))
+        temp[0:temp.shape[0] - 1, 1 : temp.shape[1]-1] = im
+        for i in range(0, temp.shape[0]) - 1:
+            for j in range(0, temp.shape[1] - 1):
+                if formulation != 0:
+                    grad_x[i][j] = 0.5*(temp[i][j + 1]-temp[i][j]+temp[i + 1][j + 1]-temp[i + 1][j])
+                else:
+                    grad[i][j] = temp[i + 1][j]-temp[i][j]
+
     
-    def grad_y(self, im):
+    def grad_y(self, im, formulation = 0):
+        """
+            im - np.ndarray() n*m
+            formulation - Choice of formulation of gradient: 0 or 1
+            Padding applied : 1
+            Output : np.ndarray() (n)*(m)
+        """
         grad_y = np.zeros((im.shape[0], im.shape[1]))
-        temp = np.zeros((im.shape[0]+2, im.shape[1]+2))
-        temp[1:temp.shape[0]-1,1:temp.shape[1]-1]=im
-        for i in range(0,im.shape[0]):
-            for j in range(0,im.shape[1]):
-                grad_y[i][j] = 0.5*(im[i][j+1]-im[i][j]+im[i+1][j+1]-im[i+1][j])
+        temp = np.zeros((im.shape[0] + 1, im.shape[1] + 1))
+        temp[0 : temp.shape[0] - 1, 0 : temp.shape[1] - 1] = im
+        for i in range(0, temp.shape[0] - 1):
+            for j in range(0, temp.shape[1] - 1):
+                if formulation != 0:
+                    grad_y[i][j] = 0.5*(temp[i][j + 1]-temp[i][j]+temp[i + 1][j + 1]-temp[i + 1][j])
+                else:
+                    grad_y[i][j] = im[i + 1][j]-im[i][j]
+
+    def grad_2_x(self, im):
+        """
+            im - np,ndarray() n*m
+            Padding applied - 1
+            Output : np.ndarray() n*m
+        """
+        grad_2_x = np.zeros(im.shape[0],im.shape[1])
+        temp = np.zeros(im.shape[0]+2, im.shape[1]+2)
+        temp[1 : temp.shape[0] - 1][1 : temp.shape[1] - 1] = im
+        for i in range(1, temp.shape[0] - 1):
+            for j in range(1, temp.shape[1] - 1):
+                grad_2_x[i][j] = temp[i + 1][j] + temp[i - 1][j] - 2*temp[i][j]
+
+    def grad_2_y(self, im):
+        """
+            im - np.ndarray() n*m
+            Padding applied - 1
+            Output - np.ndarray() n*m
+        """
+        grad_2_y = np.ndarray(im.shape[0], im.shape[1])
+        temp = np.zeros(im.shape + 2, im.shape[1] + 2)
+        temp[1 : temp.shape[0] - 1][1 : temp.shape[1]-]  = im
+            for i in range(1, temp.shape[0]-1):
+                for j in range(1, temp.shape[1]-1):
+                    grad_2_y = temp[i][j + 1] + temp[i][j - 1] - 2*temp[i][j]
 
 
 class convolution():
