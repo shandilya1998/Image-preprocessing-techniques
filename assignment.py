@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import copy
 
 class Image():
-    def __init__(self, path):
+    def __init__(self, path=False):
         self.path = path
 
     # This function rescales the image pixel values between 0 to 255
@@ -35,21 +35,21 @@ class Image():
             self.image_data = img.get_fdata()
         else:
             example_filename = os.path.join(data_path,'example4d.nii.gz')
-            img = nib.load(self.path()
+            img = nib.load(example_filename)
             self.image_data = img.get_fdata()
 
     def imhist(self,im):
         # calculates normalized histogram of an image
-	m, n = im.shape
-	h = [0.0] * 256
-	for i in range(m):
-		for j in range(n):
-			h[im[i, j]]+=1
-	return np.array(h)/(m*n)
+        m, n = im.shape
+        h = [0.0] * 256
+        for i in range(m):
+            for j in range(n):
+                h[int(im[i, j])]+=1
+        return np.array(h)/(m*n)
 
     def cumsum(self,h):
 	# finds cumulative sum of a numpy array, list
-	return [sum(h[:i+1]) for i in range(len(h))]
+    	return [sum(h[:i+1]) for i in range(len(h))]
 
     """
     This method takes image_data as input, 
@@ -58,26 +58,73 @@ class Image():
     """
     def histeq(self,im):
         #calculate Histogram
-	orig_hist = self.imhist(im)
-	cdf = np.array(self.cumsum(orig_hist)) #cumulative distribution function
-	sk = np.uint8(255 * cdf) #finding transfer function values
-	s1, s2 = im.shape
-	Y = np.zeros_like(im)
-	# applying transfered values for each pixels
+        orig_hist = self.imhist(im)
+        cdf = np.array(self.cumsum(orig_hist)) #cumulative distribution function
+        sk = np.uint8(255 * cdf) #finding transfer function values
+        s1, s2 = im.shape
+        Y = np.zeros_like(im)
+    	# applying transfered values for each pixels
         for i in range(0, s1):
-		for j in range(0, s2):
-			Y[i, j] = sk[im[i, j]]
-	new_hist = self.imhist(Y)
-	#return transformed image, original and new histogram and transform function
+            for j in range(0, s2):
+                Y[i, j] = sk[int(im[i, j])]
+            new_hist = self.imhist(Y)
+    	#return transformed image, original and new histogram and transform function
         return Y,orig_hist,new_hist,sk
 
-    def main()
-        return True
+    def main(self):
+        self.image_data = self.image_data.astype('int64')
+        if len(self.image_data.shape)==3:
+            print('3')
+            fig, axs = plt.subplots(self.image_data.shape[2], sharex=True, sharey=True)
+            for i in range(self.image_data.shape[2]):
+                Y, orig_hist, new_hist, sk = self.histeq(self.image_data[:,:,i])
+                axs[i].imshow(Y)
+            plt.show()
+        elif len(self.image_data.shape) == 4:
+            print('4')
+            fig, axs = plt.subplots(self.image_data.shape[2], self.image_data.shape[3], sharex = True, sharey = True)
+            k = 0
+            for i in range(self.image_data.shape[2]):
+                for j in range(self.image_data.shape[3]):
+                        Y, orig_hist, new_hist, sk = self.histeq(self.image_data[:,:,i,j])
+                        axs[k].imshow(Y)
+                        k+=1
+                plt.show()
 
+class gradient():
+    def __init__(self,path = None):
+        self.path = path
+        self.img = nib.load(self.path)
+        self.image_data = self.img.get_fdata()
 
-
-
-
-
-
+    def grad_x(self, im):
+        grad_x = np.zeros((im.shape[0], im.shape[1]))
+        temp = np.zeros((im.shape[0]+2,im.shape[1]+2))
+        temp[1:temp.shape[0]-1,1:temp.shape[1]-1] = im
+        for i in range(0,im.shape[0]):
+            for j in range(0,im.shape[1]):
+                grad_x[i][j] = 0.5*(im[i][j+1]-im[i][j]+im[i+1][j+1]-im[i+1][j])
     
+    def grad_y(self, im):
+        grad_y = np.zeros((im.shape[0], im.shape[1]))
+        temp = np.zeros((im.shape[0]+2, im.shape[1]+2))
+        temp[1:temp.shape[0]-1,1:temp.shape[1]-1]=im
+        for i in range(0,im.shape[0]):
+            for j in range(0,im.shape[1]):
+                grad_y[i][j] = 0.5*(im[i][j+1]-im[i][j]+im[i+1][j+1]-im[i+1][j])
+
+
+class convolution():
+    def __init__(self, path = None, fltr = np.asarray([1]), padding = 0, stride = 1):
+        self.path = path
+        self.fltr = fltr
+        self.padding = padding
+        self.stride = stride
+
+    def convolve(self, im):
+        for i in range():
+            print(i)
+
+
+
+
