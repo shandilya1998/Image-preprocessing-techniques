@@ -186,7 +186,13 @@ class convolution():
             Output - (((n - filter.shape[0] + 2*padding)/stride) + 1)*(((m - filter.shape[1] +2*padding)/stride) + 1)
         """
         y = np.zeros(((im.shape[0] - self.fltr.shape[0] + 2*self.padding)/self.stride)+1, ((im.shape[1] - self.fltr.shape[1] + 2*self.padding)/stride)+1)
-
+        k = 0
+        l = 0
         for i in range(0, ((im.shape[0] - self.fltr.shape[0] + 2*self.padding)/self.stride+1):
-            for j in range(0, ((im.shape[1] - self.fltr.shape[1] + 2*self.padding)/stride)+1):
-                y[i][j] = np.dot(im[][],  self.fltr)
+            for j in range(0, ((im.shape[1] - self.fltr.shape[1] + 2*self.padding)/self.stride)+1):
+                y[i][j] = np.dot(im[k : k+self.fltr.shape[0]][l : self.fltr.shape[1]],  self.fltr)
+		l = l + 1
+            k = k + 1
+        return (y)
+
+
