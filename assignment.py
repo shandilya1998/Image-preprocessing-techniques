@@ -166,10 +166,27 @@ class convolution():
         self.padding = padding
         self.stride = stride
 
+    def convolve_with_impulse_response(self, im, magnitude = 1):
+        """
+            convolves input image with an impulse response of magnitude
+            im - np.ndarray() n*m
+            Output - np.ndarray() n*m
+        """
+        y = np.zeros(im.shape[0], im.shape[1]) # [y] = [im]*[delta]
+        for i in range(0, im.shape[0] - 1):
+            for j in range(0, im.shape[1] - 1):
+                y[i][j] = im[i][j]*magnitude
+        return y
+
     def convolve(self, im):
-        for i in range():
-            print(i)
+        """
+            convolves im with filter
+            im - np.ndarray() n*m
+            filter - np.ndarray() x*y
+            Output - (((n - filter.shape[0] + 2*padding)/stride) + 1)*(((m - filter.shape[1] +2*padding)/stride) + 1)
+        """
+        y = np.zeros(((im.shape[0] - self.fltr.shape[0] + 2*self.padding)/self.stride)+1, ((im.shape[1] - self.fltr.shape[1] + 2*self.padding)/stride)+1)
 
-
-
-
+        for i in range(0, ((im.shape[0] - self.fltr.shape[0] + 2*self.padding)/self.stride+1):
+            for j in range(0, ((im.shape[1] - self.fltr.shape[1] + 2*self.padding)/stride)+1):
+                y[i][j] = np.dot(im[][],  self.fltr)
