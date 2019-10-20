@@ -219,7 +219,7 @@ def main():
         print('Computing gradient')
         plot_func(Y, image.image_data, maxval, minval, grad_x, grad_y, grad_2_x, grad_2_y)
         # The magnitude of the impulse response has been assumed to be 5 here. Please change here to observe changes in the output
-        print('Performing Convolutions')
+        print('Performing Convolution')
         plot_conv_results(image.image_data, conv)
     elif len(image.image_data.shape)==3:
         print('3')
@@ -229,7 +229,7 @@ def main():
             print('Computing gradient')
             grad_x, grad_y, grad_2_x, grad_2_y = grad.main(image.image_data[:, :, i])
             plot_func(Y, image.image_data[:, :, i], maxval, minval, grad_x, grad_y, grad_2_x, grad_2_y)
-            print('Performing Convolutions')
+            print('Performing Convolution')
             plot_conv_results(image.image_data[:, :, i], conv)
     elif len(image.image_data.shape) == 4:
         print('4')
@@ -240,7 +240,7 @@ def main():
                 print('Computing gradient')
                 grad_x, grad_y, grad_2_x, grad_2_y = grad.main(image.image_data[:, :, i, j])
                 plot_func(Y, image.image_data[:, :, i, j], maxval, minval, grad_x, grad_y, grad_2_x, grad_2_y)
-                print('Performing Convolutions')
+                print('Performing Convolution')
                 plot_conv_results(image.image_data[:, :, i, j], conv)
     
 def plot_func(Y, im, maxval, minval, grad_x, grad_y, grad_2_x, grad_2_y):
