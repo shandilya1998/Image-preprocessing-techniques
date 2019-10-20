@@ -84,57 +84,32 @@ class Gradient():
     def __init__(self, path = None):
         self.path = path
     
-    def import_image(self):
-        self.image_data = plt.imread(self.path)
-        
-    """
-        If the image is more than 2 dimensions, 
-        only a slice will be taken for demonstration of histogram equalization
-        and the output image will be grayscale
-    """
-    def import_image_nib_compatible(self):
-        if self.path:
-            img = nib.load(self.path)
-            self.image_data = img.get_fdata()
-        else:
-            example_filename = os.path.join(data_path,'example4d.nii.gz')
-            img = nib.load(example_filename)
-            self.image_data = img.get_fdata()
-
-    def grad_x(self, im, formulation):
+    def grad_x(self, im):
         """
             im - np.ndarray() n*m
-            formulation - Choice of formulation of gradient: 0 or 1
             Padding applied : 1
             Output : np.ndarray() (n)*(m)
         """
-        grad_x = np.zeros((im.shape[0], im.shape[1])) 
+        grad_x = np.zeros(im.shape) 
         temp = np.zeros((im.shape[0] + 1, im.shape[1] + 1))
-        temp[0:temp.shape[0] - 1, 1 : temp.shape[1]-1] = im
-        for i in range(0, temp.shape[0]) - 1:
+        temp[0 : temp.shape[0] - 1, 0 : temp.shape[1]-1] = im
+        for i in range(0, temp.shape[0] - 1):
             for j in range(0, temp.shape[1] - 1):
-                if formulation != 0:
-                    grad_x[i][j] = 0.5*(temp[i][j + 1]-temp[i][j]+temp[i + 1][j + 1]-temp[i + 1][j])
-                else:
-                    grad_x[i][j] = temp[i + 1][j]-temp[i][j]
+                grad_x[i][j] = temp[i + 1][j]-temp[i][j]
         return grad_x
 
-    def grad_y(self, im, formulation = 0):
+    def grad_y(self, im):
         """
             im - np.ndarray() n*m
-            formulation - Choice of formulation of gradient: 0 or 1
             Padding applied : 1
             Output : np.ndarray() (n)*(m)
         """
-        grad_y = np.zeros((im.shape[0], im.shape[1]))
+        grad_y = np.zeros(im.shape)
         temp = np.zeros((im.shape[0] + 1, im.shape[1] + 1))
         temp[0 : temp.shape[0] - 1, 0 : temp.shape[1] - 1] = im
         for i in range(0, temp.shape[0] - 1):
             for j in range(0, temp.shape[1] - 1):
-                if formulation != 0:
-                    grad_y[i][j] = 0.5*(temp[i][j + 1]-temp[i][j]+temp[i + 1][j + 1]-temp[i + 1][j])
-                else:
-                    grad_y[i][j] = im[i + 1][j]-im[i][j]
+                grad_y[i][j] = temp[i][j + 1]-temp[i][j]
         return grad_y
 
     def grad_2_x(self, im):
@@ -143,11 +118,15 @@ class Gradient():
             Padding applied - 1
             Output : np.ndarray() n*m
         """
-        grad_2_x = np.zeros(im.shape[0],im.shape[1])
-        temp = np.zeros(im.shape[0]+2, im.shape[1]+2)
-        temp[1 : temp.shape[0] - 1][1 : temp.shape[1] - 1] = im
-        for i in range(1, temp.shape[0] - 1):
-            for j in range(1, temp.shape[1] - 1):
+        grad_2_x = np.zeros(im.shape)
+        temp = np.zeros((im.shape[0]+2, im.shape[1]+2))
+        print(temp.shape)
+        print(temp.shape[0])
+        print(temp.shape[1])
+        print(temp[1 : temp.shape[0] - 1, 1 : temp.shape[1] - 1].shape)
+        temp[1 : temp.shape[0] - 1, 1 : temp.shape[1] - 1] = im
+        for i in range(1, temp.shape[0] - 2):
+            for j in range(1, temp.shape[1] - 2):
                 grad_2_x[i][j] = temp[i + 1][j] + temp[i - 1][j] - 2*temp[i][j]
         return grad_2_x
 
@@ -157,18 +136,20 @@ class Gradient():
             Padding applied - 1
             Output - np.ndarray() n*m
         """
-        grad_2_y = np.ndarray(im.shape[0], im.shape[1])
-        temp = np.zeros(im.shape + 2, im.shape[1] + 2)
-        temp[1 : temp.shape[0] - 1][1 : temp.shape[1] - 1]  = im
-        for i in range(1, temp.shape[0]-1):
-            for j in range(1, temp.shape[1]-1):
+        grad_2_y = np.ndarray(im.shape)
+        temp = np.zeros((im.shape[0] + 2, im.shape[1] + 2))
+        temp[1 : temp.shape[0] - 1, 1 : temp.shape[1] - 1]  = im
+        for i in range(1, temp.shape[0]-2):
+            for j in range(1, temp.shape[1]-2):
                 grad_2_y[i][j] = temp[i][j + 1] + temp[i][j - 1] - 2*temp[i][j]
         return grad_2_y
 
-    def main(self):
-
-        return True
-
+    def main(self, im):
+        grad_x = self.grad_x(im)
+        grad_y = self.grad_y(im)
+        grad_2_x = self.grad_2_x(im)
+        grad_2_y = self.grad_2_y(im)
+        return grad_x, grad_y, grad_2_x, grad_2_y
 
 class convolution():
     def __init__(self, path = None, fltr = np.asarray([1]), padding = 0, stride = 1):
@@ -211,57 +192,47 @@ def main():
     path = input("enter the path to the image here")
     image = Image(path)
     grad = Gradient(path)
+    
     if path[-3:] == 'png':
         image.import_image()
-        grad.import_image()
     else:
         image.import_image_nib_compatible()
-        grad.import_image_nib_compatible()
-    image.main()
-    grad.main()
+        
     image.image_data = image.image_data.astype('int64')
+    
     if len(image.image_data.shape) == 2:
         print('2')
-        fig, axs = plt.subplots(2, 2, sharex = True, sharey = True)
         Y, orig_hist, new_hist, sk, maxval, minval = image.histeq(image.image_data)
-        axs[0, 0].imshow(Y)
-        axs[0, 0].set_title('Transformed Image')
-        axs[0, 1].imshow(image.image_data)
-        axs[0, 1].set_title('Original Image')
-        axs[1, 0].hist(new_hist, bins = np.arange(minval, maxval+1))
-        axs[1, 0].set_title('Transformed Histogram')
-        axs[1, 1].hist(orig_hist, bins = np.arange(minval, maxval+1))
-        axs[1, 1].set_title('Original Histogram')
-        plt.show()
+        grad_x, grad_y, grad_2_x, grad_2_y = grad.main(image.image_data)
+        plot_func(Y, image.image_data, maxval, minval, grad_x, grad_y, grad_2_x, grad_2_y)
     elif len(image.image_data.shape)==3:
         print('3')
         for i in range(image.image_data.shape[2]):
-            fig, axs = plt.subplots(2,2, sharex = True, sharey = True)
             Y, orig_hist, new_hist, sk, maxval, minval = image.histeq(image.image_data[:,:,i])
-            axs[0, 0].imshow(Y)
-            axs[0, 0].set_title('Transformed Image')
-            axs[0, 1].imshow(image.image_data[:, :, i])
-            axs[0, 1].set_title('Original Image')
-            axs[1, 0].hist(new_hist, bins = np.arange(minval, maxval+1))
-            axs[1, 0].set_title('Transformed Histogram')
-            axs[1, 1].hist(orig_hist, bins = np.arange(minval, maxval+1))
-            axs[1, 1].set_title('Original Histogram')
-            plt.show()
+            grad_x, grad_y, grad_2_x, grad_2_y = grad.main(image.image_data[:, :, i])
+            plot_func(Y, image.image_data[:, :, i], maxval, minval, grad_x, grad_y, grad_2_x, grad_2_y)
     elif len(image.image_data.shape) == 4:
         print('4')
         for i in range(image.image_data.shape[2]):
             for j in range(image.image_data.shape[3]):
-                fig, axs = plt.subplots(2,2, sharex = True, sharey = True)
                 Y, orig_hist, new_hist, sk, maxval, minval = image.histeq(image.image_data[:,:,i,j])
-                axs[0, 0].imshow(Y)
-                axs[0, 0].set_title('Transformed Image')
-                axs[0, 1].imshow(image.image_data[:, :, i, j])
-                axs[0, 1].set_title('Original Image')
-                axs[1, 0].hist(new_hist, bins = np.arange(minval, maxval+1))
-                axs[1, 0].set_title('Transformed Histogram')
-                axs[1, 1].hist(orig_hist, bins = np.arange(minval, maxval+1))
-                axs[1, 1].set_title('Original Histogram')
-                plt.show()
+                grad_x, grad_y, grad_2_x, grad_2_y = grad.main(image.image_data[:, :, i, j])
+                plot_func(Y, image.image_data[:, :, i, j], maxval, minval, grad_x, grad_y, grad_2_x, grad_2_y)
 
+def plot_func(Y, im, maxval, minval, grad_x, grad_y, grad_2_x, grad_2_y):
+    fig, axs = plt.subplots(3,2, sharex = True, sharey = True)
+    axs[0, 0].imshow(Y)
+    axs[0, 0].set_title('Transformed Image')
+    axs[0, 1].imshow(im)
+    axs[0, 1].set_title('Original Image')
+    axs[1, 0].imshow(grad_x)
+    axs[1, 0].set_title('First order derivative wrt x')
+    axs[1, 1].imshow(grad_y)
+    axs[1, 1].set_title('First order derivative wrt y')
+    axs[2, 0].imshow(grad_2_x)
+    axs[2, 0].set_title('Second order derivative wrt x')
+    axs[2, 1].imshow(grad_2_y)
+    axs[2, 1].set_title('Second order derivative wrt y')
+    plt.show()
 
 main()
