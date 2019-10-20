@@ -202,4 +202,3 @@ def main():
         img = Image.import_image()
     else:
         img = Image.import_nib_compatible()
-    
