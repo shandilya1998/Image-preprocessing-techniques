@@ -49,7 +49,11 @@ class Image():
         h = [0.0] * 256
         for i in range(m):
             for j in range(n):
-                h[int(im[i, j])]+=1
+                try:
+                    h[int(im[i, j])]+=1
+                except ValueError:
+                    pass
+                    
         print('out of the loop')
         return np.array(h)/(m*n)
 
@@ -78,7 +82,10 @@ class Image():
     	# applying transfered values for each pixels
         for i in range(0, s1):
             for j in range(0, s2):
-                Y[i, j] = sk[int(im[i, j])]
+                try:
+                    Y[i, j] = sk[int(im[i, j])]
+                except ValueError:
+                    pass
         new_hist = self.imhist(Y)
     	#return transformed image, original and new histogram and transform function
         Y = self.rescale(Y, maxval, minval)
@@ -245,17 +252,17 @@ def main():
     
 def plot_func(Y, im, maxval, minval, grad_x, grad_y, grad_2_x, grad_2_y):
     fig, axs = plt.subplots(3,2, sharex = True, sharey = True)
-    axs[0, 0].imshow(Y)
+    axs[0, 0].imshow(Y, cmap = 'gray')
     axs[0, 0].set_title('Transformed Image')
-    axs[0, 1].imshow(im)
+    axs[0, 1].imshow(im, cmap = 'gray')
     axs[0, 1].set_title('Original Image')
-    axs[1, 0].imshow(grad_x)
+    axs[1, 0].imshow(grad_x, cmap = 'gray')
     axs[1, 0].set_title('First order derivative wrt x')
-    axs[1, 1].imshow(grad_y)
+    axs[1, 1].imshow(grad_y, cmap = 'gray')
     axs[1, 1].set_title('First order derivative wrt y')
-    axs[2, 0].imshow(grad_2_x)
+    axs[2, 0].imshow(grad_2_x, cmap = 'gray')
     axs[2, 0].set_title('Second order derivative wrt x')
-    axs[2, 1].imshow(grad_2_y)
+    axs[2, 1].imshow(grad_2_y, cmap = 'gray')
     axs[2, 1].set_title('Second order derivative wrt y')
     plt.show()
     
