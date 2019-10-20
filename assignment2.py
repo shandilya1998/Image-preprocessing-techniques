@@ -1,11 +1,9 @@
 import numpy as np
-import pandas as pd
 import os 
 import nibabel as nib
 from nibabel.testing import data_path
 import matplotlib.pyplot as plt
-import copy
-import math
+
 
 class Image():
     """
@@ -92,7 +90,7 @@ class Convolution():
 class Freq_Domain_filtering():
     def __init__(self, img):
         self.image_data = img
-        self.image_data_fft = np.fft.fft(self.image_data)
+        self.image_data_fft = np.fft.fft2(self.image_data)
         self.image_data_fft_fshift = np.fft.fftshift(self.image_data_fft)
         
     def laplacian_prod(self):
@@ -101,19 +99,18 @@ class Freq_Domain_filtering():
         """
         rows, cols = self.image_data_fft_fshift.shape
         masklap = np.zeros((rows,cols))
-        for i in range(rows):
-            for j in range(cols):
+        for i in range(int(-rows/2),int(rows/2)):
+            for j in range(int(-cols/2),int(cols/2)):
                 masklap[i][j] = -(i**2 + j**2)
-        masklap_shift = np.fft.fftshift(masklap) 
-        img_fft_fshift = self.image_data_fft_fshift*masklap_shift
+        img_fft_fshift = self.image_data_fft_fshift + self.image_data_fft_fshift*masklap
         img_fft = np.fft.ifftshift(img_fft_fshift)
-        img = np.fft.ifft(img_fft)
+        img = np.fft.ifft2(img_fft)
         img = np.abs(img)
         return img
         
 def main():
     path = input("enter the path to the image here")
-    fltr_laplacian = np.asarray([[0,-1,0],[-1,5,-1],[0,-1,0]])
+    fltr_laplacian = np.asarray([[-1, -1, -1],[-1, 9,-1],[-1, -1, -1]])
     image = Image(path)
     conv = Convolution(fltr = fltr_laplacian, 
                        padding = 0,
@@ -143,17 +140,17 @@ def main():
                 print('Performing Convolution')
                 freq_fltr = Freq_Domain_filtering(image.image_data[:, :, i, j])
                 plot_conv_results(image.image_data[:, :, i, j], conv, freq_fltr)
-    
+
 def plot_conv_results(im, conv, freq_fltr):
     out_conv_g = conv.convolve(im)
     out = freq_fltr.laplacian_prod()
-    fig, axs = plt.subplots(3, 1, sharex = True, sharey = True)
-    axs[0].imshow(im, cmap = 'gray')
-    axs[1].imshow(out_conv_g, cmap = 'gray')
-    axs[2].imshow(out, cmap = 'gray')
+    fig, axs = plt.subplots(1, 3, sharex = True, sharey = True)
+    axs[0].imshow(im)
+    axs[1].imshow(out_conv_g)
+    axs[2].imshow(out)
     axs[0].set_title('Original Image')
     axs[1].set_title('Spatial Convolution with Laplacian filter')
-    axs[2].set_title('Laplacian filtering applied in frequency domain part 1')
+    axs[2].set_title('Laplacian filtering applied in frequency domain')
     plt.show()
     
 main()

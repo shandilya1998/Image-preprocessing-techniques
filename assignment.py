@@ -278,7 +278,7 @@ def plot_conv_results(im, conv):
     axs[2].set_title('Convolution with Gaussian smoothing filter')
     plt.show()
     
-def gaussian_kernel(size, size_y=None):
+def gaussian_kernel(size, size_y = None):
     size = int(size)
     if not size_y:
         size_y = size
